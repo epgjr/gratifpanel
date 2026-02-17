@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GratifPanel — Importar Competência</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2333;
+    --border: #30363d; --accent: #1f6feb; --accent-glow: rgba(31,111,235,0.15);
+    --accent2: #3fb950; --accent2-glow: rgba(63,185,80,0.12);
+    --warn: #d29922; --warn-glow: rgba(210,153,34,0.12);
+    --danger: #f85149; --danger-glow: rgba(248,81,73,0.12);
+    --text: #e6edf3; --text2: #8b949e; --text3: #484f58;
+    --radius: 10px; --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  .brand-name { font-size: 14px; font-weight: 700; }
+  .brand-sub { font-size: 10px; color: var(--text2); font-family: 'DM Mono', monospace; letter-spacing:.06em; text-transform:uppercase; }
+  .user-badge { display:flex; align-items:center; gap:8px; }
+  .avatar { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1f6feb,#3fb950);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700; }
+
+  /* LAYOUT */
+  .layout { display:flex; flex:1; min-height: calc(100vh - 56px); }
+
+  /* SIDEBAR */
+  .sidebar { width:220px; background:var(--surface); border-right:1px solid var(--border); padding:24px 0; flex-shrink:0; }
+  .nav-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:.12em; text-transform:uppercase; padding:16px 20px 8px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 20px; font-size:13px; color:var(--text2); cursor:pointer; border-left:2px solid transparent; transition:all .15s; }
+  .nav-item:hover { color:var(--text); background:var(--surface2); }
+  .nav-item.active { color:var(--accent); background:var(--accent-glow); border-left-color:var(--accent); font-weight:500; }
+
+  /* MAIN */
+  .main { flex:1; padding:32px; overflow-y:auto; display:flex; flex-direction:column; gap:24px; }
+  .page-title { font-size:22px; font-weight:700; }
+  .page-sub { font-size:13px; color:var(--text2); margin-top:4px; }
+
+  /* CARDS */
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; position:relative; overflow:hidden; }
+  .card::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; }
+  .card.blue::before { background:linear-gradient(90deg,var(--accent),transparent); }
+  .card.green::before { background:linear-gradient(90deg,var(--accent2),transparent); }
+  .card.yellow::before { background:linear-gradient(90deg,var(--warn),transparent); }
+  .card-label { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; }
+  .card-value { font-size:24px; font-weight:700; margin-top:8px; }
+  .card-value.blue{color:var(--accent)} .card-value.green{color:var(--accent2)} .card-value.yellow{color:var(--warn)}
+  .card-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+
+  /* PANEL */
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+  .panel-header { padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; justify-content:space-between; }
+  .panel-title { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+  .panel-body { padding:24px; display:flex; flex-direction:column; gap:20px; }
+
+  /* BADGE */
+  .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-blue { background:var(--accent-glow); color:var(--accent); border:1px solid rgba(31,111,235,.3); }
+  .badge-green { background:var(--accent2-glow); color:var(--accent2); border:1px solid rgba(63,185,80,.3); }
+  .badge-yellow { background:var(--warn-glow); color:var(--warn); border:1px solid rgba(210,153,34,.3); }
+  .badge-red { background:var(--danger-glow); color:var(--danger); border:1px solid rgba(248,81,73,.3); }
+
+  /* FORM */
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-group { display:flex; flex-direction:column; gap:6px; }
+  .form-group.full { grid-column:1/-1; }
+  .label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; }
+  .input, select.input { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; color:var(--text); font-family:'Sora',sans-serif; font-size:13px; outline:none; transition:border-color .2s; width:100%; }
+  .input:focus, select.input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+
+  /* TOGGLE */
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--danger-glow); border:1px solid rgba(248,81,73,.2); border-radius:var(--radius); }
+  .toggle-info .toggle-title { font-size:13px; font-weight:600; color:var(--danger); }
+  .toggle-info .toggle-desc { font-size:11px; color:var(--text2); margin-top:2px; }
+  .toggle { width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0; }
+  .toggle.on { background:var(--danger); }
+  .toggle::after { content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s; }
+  .toggle.on::after { transform:translateX(20px); }
+
+  /* DROPZONE */
+  .dropzone { border:2px dashed var(--border); border-radius:var(--radius-lg); padding:40px 24px; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); }
+  .dropzone:hover,.dropzone.drag { border-color:var(--accent); background:var(--accent-glow); }
+  .dropzone.loaded { border-color:var(--accent2); background:var(--accent2-glow); border-style:solid; }
+  .dropzone.error { border-color:var(--danger); background:var(--danger-glow); border-style:solid; }
+  .drop-icon { font-size:36px; margin-bottom:10px; }
+  .drop-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+  .drop-sub { font-size:12px; color:var(--text2); }
+  .drop-tag { display:inline-block; margin-top:10px; padding:3px 12px; background:var(--surface2); border-radius:20px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text2); border:1px solid var(--border); }
+  input[type=file] { display:none; }
+
+  /* VALIDAÇÃO */
+  .valid-box { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .valid-header { padding:10px 16px; background:var(--surface2); border-bottom:1px solid var(--border); font-size:12px; font-weight:600; }
+  .check-row { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); font-size:12px; }
+  .check-row:last-child { border-bottom:none; }
+  .check-name { color:var(--text2); display:flex; align-items:center; gap:8px; }
+  .ok{color:var(--accent2)} .warn-t{color:var(--warn)} .err{color:var(--danger)}
+
+  /* PREVIEW */
+  .preview-wrap { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .preview-bar { padding:10px 16px; background:var(--surface2); border-bottom:1px solid var(--border); font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:space-between; }
+  .tbl { width:100%; border-collapse:collapse; }
+  .tbl th { background:var(--surface2); padding:8px 12px; text-align:left; font-size:10px; font-family:'DM Mono',monospace; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .tbl td { padding:8px 12px; font-size:12px; border-bottom:1px solid var(--border); }
+  .tbl tr:last-child td { border-bottom:none; }
+  .tbl tr:hover td { background:var(--surface2); }
+  .mono { font-family:'DM Mono',monospace; }
+  .val-green { color:var(--accent2); }
+
+  /* BUTTONS */
+  .btn-row { display:flex; gap:12px; justify-content:flex-end; }
+  .btn { padding:10px 20px; border-radius:var(--radius); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all .2s; display:flex; align-items:center; gap:8px; }
+  .btn-ghost { background:transparent; color:var(--text2); border:1px solid var(--border); }
+  .btn-ghost:hover { border-color:var(--text2); color:var(--text); }
+  .btn-primary { background:var(--accent); color:white; box-shadow:0 0 20px rgba(31,111,235,.3); }
+  .btn-primary:hover:not(:disabled) { background:#388bfd; transform:translateY(-1px); }
+  .btn-primary:disabled { background:var(--border); color:var(--text3); box-shadow:none; cursor:not-allowed; }
+  .btn-success { background:var(--accent2); color:#0d1117; }
+  .btn-success:hover { background:#56d364; }
+
+  /* LOG */
+  .log-tbl { width:100%; border-collapse:collapse; }
+  .log-tbl th { background:var(--surface2); padding:10px 16px; text-align:left; font-size:10px; font-family:'DM Mono',monospace; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
+  .log-tbl td { padding:12px 16px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .log-tbl tr:last-child td { border-bottom:none; }
+  .log-tbl tr:hover td { background:var(--surface2); }
+  .pill { padding:3px 10px; border-radius:20px; font-size:10px; font-weight:600; font-family:'DM Mono',monospace; }
+  .pill-ok { background:var(--accent2-glow); color:var(--accent2); border:1px solid rgba(63,185,80,.3); }
+  .pill-sub { background:var(--warn-glow); color:var(--warn); border:1px solid rgba(210,153,34,.3); }
+
+  /* PROGRESS */
+  .progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:8px; }
+  .progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .3s; width:0; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; right:24px; background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; display:none; align-items:center; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,.4); z-index:999; animation:slideUp .3s ease; }
+  .toast.show { display:flex; }
+  .toast.success { border:1px solid var(--accent2); }
+  .toast.error { border:1px solid var(--danger); }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .toast-title { font-size:13px; font-weight:600; }
+  .toast-sub { font-size:11px; color:var(--text2); }
+
+  /* SPINNER */
+  .spinner { width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* HIDDEN */
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div>
+      <div class="brand-name">GratifPanel</div>
+      <div class="brand-sub">Gestão de Gratificação de Desempenho</div>
+    </div>
+  </div>
+  <div class="user-badge">
+    <div id="userName" style="font-size:12px;font-weight:600;text-align:right"></div>
+    <div class="avatar" id="userAvatar">?</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item">📊 Dashboard</div>
+    <div class="nav-item active">⬆️ Importar Dados</div>
+    <div class="nav-item">📅 Competências</div>
+    <div class="nav-label">Análise</div>
+    <div class="nav-item">📈 Evolução Mensal</div>
+    <div class="nav-item">👥 Por Servidor</div>
+    <div class="nav-item">🏢 Por Cargo</div>
+    <div class="nav-label">Config</div>
+    <div class="nav-item">⚙️ Configurações</div>
+  </div>
+
+  <div class="main">
+
+    <div>
+      <div class="page-title">Importar Competência</div>
+      <div class="page-sub">Carregue o arquivo CSV mensal da gratificação de desempenho</div>
+    </div>
+
+    <!-- CARDS RESUMO -->
+    <div class="cards" id="cardsResumo">
+      <div class="card blue">
+        <div class="card-label">Última competência</div>
+        <div class="card-value blue" id="ultimaComp">—</div>
+        <div class="card-sub" id="ultimaData">Aguardando dados...</div>
+      </div>
+      <div class="card green">
+        <div class="card-label">Registros na última</div>
+        <div class="card-value green" id="ultimaLinhas">—</div>
+        <div class="card-sub" id="ultimaOp">—</div>
+      </div>
+      <div class="card yellow">
+        <div class="card-label">Total de importações</div>
+        <div class="card-value yellow" id="totalImport">—</div>
+        <div class="card-sub">no histórico</div>
+      </div>
+    </div>
+
+    <!-- PAINEL DE UPLOAD -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⬆️ Importação de arquivo CSV</div>
+        <span class="badge badge-blue" id="etapaBadge">Etapa 1 de 3 — Configurar</span>
+      </div>
+      <div class="panel-body">
+
+        <!-- ETAPA 1: CONFIGURAÇÃO -->
+        <div id="etapa1">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="label">Seu nome ou e-mail</label>
+              <input class="input" id="inputUsuario" type="text" placeholder="ex: joao.silva@orgao.gov.br">
+            </div>
+            <div class="form-group">
+              <label class="label">Arquivo CSV</label>
+              <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+                ondragover="event.preventDefault();this.classList.add('drag')"
+                ondragleave="this.classList.remove('drag')"
+                ondrop="handleDrop(event)">
+                <div id="dropDefault">
+                  <div class="drop-icon">📂</div>
+                  <div class="drop-title">Clique ou arraste o CSV aqui</div>
+                  <div class="drop-sub">Arquivo exportado do sistema de folha</div>
+                  <div class="drop-tag">Apenas .CSV separado por ponto e vírgula</div>
+                </div>
+                <div id="dropLoaded" class="hidden">
+                  <div class="drop-icon">✅</div>
+                  <div class="drop-title" id="nomeArquivo" style="color:var(--accent2)"></div>
+                  <div class="drop-sub" id="infoArquivo"></div>
+                  <div class="drop-tag" style="color:var(--accent2);border-color:var(--accent2)">Arquivo selecionado</div>
+                </div>
+              </div>
+              <input type="file" id="fileInput" accept=".csv" onchange="selecionarArquivo(this)">
+            </div>
+            <div class="form-group full">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-title">⚠️ Substituir competência existente</div>
+                  <div class="toggle-desc">Ative se este mês já foi importado e precisa ser reprocessado</div>
+                </div>
+                <div class="toggle" id="toggleSubstituir" onclick="toggleModo()"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnValidar" onclick="validarCSV()" disabled>
+              🔍 Validar arquivo
+            </button>
+          </div>
+        </div>
+
+        <!-- ETAPA 2: RESULTADO DA VALIDAÇÃO -->
+        <div id="etapa2" class="hidden">
+          <div class="valid-box">
+            <div class="valid-header">🔍 Resultado da validação automática</div>
+            <div class="check-row">
+              <div class="check-name">📋 Estrutura do arquivo (colunas obrigatórias)</div>
+              <div class="ok" id="checkColunas">Verificando...</div>
+            </div>
+            <div class="check-row">
+              <div class="check-name">🔢 Total de linhas detectadas</div>
+              <div class="ok" id="checkLinhas">—</div>
+            </div>
+            <div class="check-row">
+              <div class="check-name">📅 MES_ANO identificado</div>
+              <div id="checkMesAno" class="ok">—</div>
+            </div>
+            <div class="check-row">
+              <div class="check-name">💰 Valores inválidos (não numéricos)</div>
+              <div id="checkValores" class="ok">—</div>
+            </div>
+            <div class="check-row">
+              <div class="check-name">🔁 Competência já importada no banco</div>
+              <div id="checkExiste" class="ok">—</div>
+            </div>
+          </div>
+
+          <!-- PREVIEW -->
+          <div class="preview-wrap" id="previewWrap">
+            <div class="preview-bar">
+              <span>👁️ Pré-visualização — primeiras 5 linhas</span>
+              <span class="badge badge-green" id="previewBadge"></span>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="tbl" id="previewTabela">
+                <thead id="previewHead"></thead>
+                <tbody id="previewBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="voltarEtapa1()">↩ Voltar</button>
+            <button class="btn btn-primary" id="btnConfirmar" onclick="confirmarImportacao()">
+              ✓ Confirmar e importar
+            </button>
+          </div>
+        </div>
+
+        <!-- ETAPA 3: PROGRESSO -->
+        <div id="etapa3" class="hidden">
+          <div style="text-align:center;padding:32px 0">
+            <div style="font-size:36px;margin-bottom:12px">⏳</div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:8px">Importando dados...</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:20px" id="progressoTexto">Aguarde, isso pode levar alguns instantes.</div>
+            <div class="progress-bar" style="max-width:400px;margin:0 auto">
+              <div class="progress-fill" id="progressoFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETAPA 4: CONCLUÍDO -->
+        <div id="etapa4" class="hidden">
+          <div style="text-align:center;padding:32px 0">
+            <div style="font-size:48px;margin-bottom:12px">✅</div>
+            <div style="font-size:18px;font-weight:700;color:var(--accent2);margin-bottom:8px">Importação concluída!</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:24px" id="resumoConcluido"></div>
+            <button class="btn btn-ghost" onclick="novaImportacao()" style="margin:0 auto">
+              + Nova importação
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">📋 Histórico de importações</div>
+        <span class="badge badge-green" id="logBadge">Carregando...</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="log-tbl">
+          <thead>
+            <tr>
+              <th>Competência</th>
+              <th>Usuário</th>
+              <th>Data / Hora</th>
+              <th>Linhas</th>
+              <th>Operação</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">Carregando histórico...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div style="font-size:20px" id="toastIcon">✅</div>
+  <div>
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-sub" id="toastSub"></div>
+  </div>
+</div>
+
+<script>
+  // ── Estado
+  let arquivoSelecionado = null;
+  let substituirModo = false;
+  let dadosValidacao = null;
+  const API = window.location.origin;
+
+  // ── Init
+  window.onload = () => {
+    carregarHistorico();
+    document.getElementById('inputUsuario').addEventListener('input', verificarPronto);
+  };
+
+  // ── Toggle substituição
+  function toggleModo() {
+    substituirModo = !substituirModo;
+    document.getElementById('toggleSubstituir').classList.toggle('on', substituirModo);
+  }
+
+  // ── Seleção de arquivo
+  function selecionarArquivo(input) {
+    if (input.files[0]) processarArquivo(input.files[0]);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.remove('drag');
+    if (e.dataTransfer.files[0]) processarArquivo(e.dataTransfer.files[0]);
+  }
+
+  function processarArquivo(file) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      mostrarToast('error', '❌ Arquivo inválido', 'Selecione um arquivo .CSV');
+      return;
+    }
+    arquivoSelecionado = file;
+    const tamanho = (file.size / 1024 / 1024).toFixed(1);
+    document.getElementById('dropDefault').classList.add('hidden');
+    document.getElementById('dropLoaded').classList.remove('hidden');
+    document.getElementById('nomeArquivo').textContent = file.name;
+    document.getElementById('infoArquivo').textContent = `${tamanho} MB`;
+    document.getElementById('dropzone').classList.add('loaded');
+    verificarPronto();
+  }
+
+  function verificarPronto() {
+    const usuario = document.getElementById('inputUsuario').value.trim();
+    document.getElementById('btnValidar').disabled = !(arquivoSelecionado && usuario);
+  }
+
+  // ── ETAPA 1: Validação
+  async function validarCSV() {
+    const usuario = document.getElementById('inputUsuario').value.trim();
+    if (!arquivoSelecionado || !usuario) return;
+
+    document.getElementById('btnValidar').innerHTML = '<div class="spinner"></div> Validando...';
+    document.getElementById('btnValidar').disabled = true;
+
+    const form = new FormData();
+    form.append('arquivo', arquivoSelecionado);
+
+    try {
+      const resp = await fetch(`${API}/api/validar`, { method: 'POST', body: form });
+      dadosValidacao = await resp.json();
+      mostrarValidacao(dadosValidacao);
+    } catch(e) {
+      mostrarToast('error', '❌ Erro de conexão', 'Verifique se o servidor está online');
+      document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
+      document.getElementById('btnValidar').disabled = false;
+    }
+  }
+
+  function mostrarValidacao(d) {
+    document.getElementById('etapa1').classList.add('hidden');
+    document.getElementById('etapa2').classList.remove('hidden');
+    document.getElementById('etapaBadge').textContent = 'Etapa 2 de 3 — Validar';
+
+    // Checks
+    document.getElementById('checkColunas').className = d.ok ? 'ok' : 'err';
+    document.getElementById('checkColunas').textContent = d.ok
+      ? '✓ Aprovado — todas as colunas encontradas'
+      : `✗ Erro — colunas faltando: ${d.colunas_faltando.join(', ')}`;
+
+    document.getElementById('checkLinhas').textContent = `✓ ${d.total_linhas.toLocaleString('pt-BR')} linhas detectadas`;
+
+    document.getElementById('checkMesAno').textContent = d.mes_ano
+      ? `✓ ${d.mes_ano}`
+      : '⚠ Não identificado';
+    document.getElementById('checkMesAno').className = d.mes_ano ? 'ok' : 'warn-t';
+
+    document.getElementById('checkValores').textContent = d.valores_invalidos === 0
+      ? '✓ Nenhum valor inválido'
+      : `⚠ ${d.valores_invalidos} valores não numéricos`;
+    document.getElementById('checkValores').className = d.valores_invalidos === 0 ? 'ok' : 'warn-t';
+
+    document.getElementById('checkExiste').textContent = d.ja_existe
+      ? `⚠ Atenção — ${d.mes_ano} já foi importado. Ative "Substituir" para reprocessar.`
+      : '✓ Não — primeira importação deste mês';
+    document.getElementById('checkExiste').className = d.ja_existe ? 'warn-t' : 'ok';
+
+    // Preview
+    if (d.preview && d.preview.length > 0) {
+      const cols = Object.keys(d.preview[0]);
+      document.getElementById('previewBadge').textContent = `${d.total_linhas.toLocaleString('pt-BR')} linhas no total`;
+      document.getElementById('previewHead').innerHTML =
+        '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+      document.getElementById('previewBody').innerHTML =
+        d.preview.map(row =>
+          '<tr>' + cols.map(c => `<td class="${c==='VALOR'?'mono val-green':'mono'}">${row[c]??''}</td>`).join('') + '</tr>'
+        ).join('');
+    }
+
+    document.getElementById('btnConfirmar').disabled = !d.ok;
+  }
+
+  function voltarEtapa1() {
+    document.getElementById('etapa2').classList.add('hidden');
+    document.getElementById('etapa1').classList.remove('hidden');
+    document.getElementById('etapaBadge').textContent = 'Etapa 1 de 3 — Configurar';
+    document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
+    document.getElementById('btnValidar').disabled = false;
+  }
+
+  // ── ETAPA 2: Confirmação e importação
+  async function confirmarImportacao() {
+    const usuario = document.getElementById('inputUsuario').value.trim();
+
+    document.getElementById('etapa2').classList.add('hidden');
+    document.getElementById('etapa3').classList.remove('hidden');
+    document.getElementById('etapaBadge').textContent = 'Etapa 3 de 3 — Importando';
+
+    // Animação de progresso
+    let prog = 0;
+    const interval = setInterval(() => {
+      prog = Math.min(prog + Math.random() * 8, 90);
+      document.getElementById('progressoFill').style.width = prog + '%';
+    }, 400);
+
+    const form = new FormData();
+    form.append('arquivo', arquivoSelecionado);
+    form.append('usuario', usuario);
+    form.append('substituir', substituirModo);
+
+    try {
+      const resp = await fetch(`${API}/api/importar`, { method: 'POST', body: form });
+      const data = await resp.json();
+      clearInterval(interval);
+      document.getElementById('progressoFill').style.width = '100%';
+
+      setTimeout(() => {
+        document.getElementById('etapa3').classList.add('hidden');
+        document.getElementById('etapa4').classList.remove('hidden');
+        document.getElementById('etapaBadge').textContent = '✓ Concluído';
+        document.getElementById('resumoConcluido').textContent =
+          `${data.inseridos.toLocaleString('pt-BR')} registros inseridos · ${data.mes_ano} · operação: ${data.operacao}`;
+        mostrarToast('success', '🚀 Importação concluída!', `${data.inseridos.toLocaleString('pt-BR')} registros · ${data.mes_ano}`);
+        carregarHistorico();
+      }, 800);
+
+    } catch(e) {
+      clearInterval(interval);
+      mostrarToast('error', '❌ Erro na importação', 'Tente novamente ou contate o administrador');
+      document.getElementById('etapa3').classList.add('hidden');
+      document.getElementById('etapa2').classList.remove('hidden');
+    }
+  }
+
+  function novaImportacao() {
+    arquivoSelecionado = null;
+    dadosValidacao = null;
+    substituirModo = false;
+    document.getElementById('toggleSubstituir').classList.remove('on');
+    document.getElementById('dropzone').classList.remove('loaded','error');
+    document.getElementById('dropDefault').classList.remove('hidden');
+    document.getElementById('dropLoaded').classList.add('hidden');
+    document.getElementById('fileInput').value = '';
+    document.getElementById('etapa4').classList.add('hidden');
+    document.getElementById('etapa1').classList.remove('hidden');
+    document.getElementById('etapaBadge').textContent = 'Etapa 1 de 3 — Configurar';
+    document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
+    document.getElementById('btnValidar').disabled = true;
+  }
+
+  // ── Histórico
+  async function carregarHistorico() {
+    try {
+      const resp = await fetch(`${API}/api/historico`);
+      const data = await resp.json();
+      const logs = data.dados || [];
+
+      document.getElementById('logBadge').textContent = `${logs.length} operações`;
+
+      if (logs.length === 0) {
+        document.getElementById('logBody').innerHTML =
+          '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">Nenhuma importação registrada ainda</td></tr>';
+        return;
+      }
+
+      // Cards resumo
+      const ultimo = logs[0];
+      document.getElementById('ultimaComp').textContent = ultimo.mes_ano || '—';
+      document.getElementById('ultimaData').textContent = formatarData(ultimo.importado_em);
+      document.getElementById('ultimaLinhas').textContent = (ultimo.linhas_inseridas || 0).toLocaleString('pt-BR');
+      document.getElementById('ultimaOp').textContent = ultimo.operacao === 'SUBSTITUICAO' ? '↺ Reprocessamento' : '+ Nova importação';
+      document.getElementById('totalImport').textContent = logs.length;
+
+      document.getElementById('logBody').innerHTML = logs.map(l => `
+        <tr>
+          <td><span class="badge badge-blue">${l.mes_ano || '—'}</span></td>
+          <td class="mono" style="font-size:11px">${l.importado_por || '—'}</td>
+          <td class="mono" style="font-size:11px;color:var(--text2)">${formatarData(l.importado_em)}</td>
+          <td class="mono" style="color:var(--text2)">${(l.linhas_inseridas||0).toLocaleString('pt-BR')}</td>
+          <td><span class="pill ${l.operacao==='SUBSTITUICAO'?'pill-sub':'pill-ok'}">${l.operacao==='SUBSTITUICAO'?'Substituição':'Nova'}</span></td>
+          <td style="color:var(--accent2)">✓ Sucesso</td>
+        </tr>
+      `).join('');
+
+    } catch(e) {
+      document.getElementById('logBadge').textContent = 'erro ao carregar';
+    }
+  }
+
+  // ── Toast
+  function mostrarToast(tipo, titulo, sub) {
+    const t = document.getElementById('toast');
+    t.className = `toast ${tipo} show`;
+    document.getElementById('toastTitle').textContent = titulo;
+    document.getElementById('toastSub').textContent = sub;
+    document.getElementById('toastIcon').textContent = tipo === 'success' ? '✅' : '❌';
+    setTimeout(() => t.classList.remove('show'), 5000);
+  }
+
+  // ── Helpers
+  function formatarData(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR') + ' · ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  }
+</script>
+</body>
+</html>

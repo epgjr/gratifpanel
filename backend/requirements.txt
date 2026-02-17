@@ -1,0 +1,10 @@
+# GratifPanel — Dependências Python
+# Instale com: pip install -r requirements.txt
+
+supabase==2.10.0
+pandas==2.2.3
+chardet==5.2.0
+python-dotenv==1.0.1
+fastapi==0.115.6
+uvicorn==0.32.1
+python-multipart==0.0.20
