@@ -16,7 +16,7 @@ from typing import Optional
 import chardet
 import pandas as pd
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -48,9 +48,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Usuários autorizados (carregados da variável de ambiente)
+# Formato: email1:senha1,email2:senha2,email3:senha3
+ALLOWED_USERS_RAW = os.getenv("ALLOWED_USERS", "")
+ALLOWED_USERS = {}
+
+if ALLOWED_USERS_RAW:
+    for user_entry in ALLOWED_USERS_RAW.split(","):
+        if ":" in user_entry:
+            email, password = user_entry.strip().split(":", 1)
+            ALLOWED_USERS[email.strip().lower()] = password.strip()
+
 
 def get_supabase() -> Client:
     return create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+# ─────────────────────────────────────────────
+#  Rota de autenticação
+# ─────────────────────────────────────────────
+
+@app.post("/api/login")
+async def login(email: str = Form(...), password: str = Form(...)):
+    """
+    Valida e-mail e senha do usuário.
+    Usuários são definidos na variável de ambiente ALLOWED_USERS.
+    Formato: email1:senha1,email2:senha2,email3:senha3
+    """
+    email_lower = email.strip().lower()
+    
+    # Se não houver usuários configurados, bloqueia acesso
+    if not ALLOWED_USERS:
+        raise HTTPException(
+            status_code=403, 
+            detail="Sistema não configurado. Entre em contato com o administrador."
+        )
+    
+    # Valida e-mail e senha
+    if email_lower in ALLOWED_USERS and ALLOWED_USERS[email_lower] == password:
+        return JSONResponse({"ok": True, "email": email})
+    else:
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos")
 
 
 # ─────────────────────────────────────────────
@@ -244,6 +282,61 @@ async def historico():
             .execute()
         )
         return JSONResponse({"ok": True, "dados": resultado.data})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/competencias")
+async def listar_competencias():
+    """Lista todas as competências (MES_ANO) no banco com contagem de registros."""
+    try:
+        supabase = get_supabase()
+        # Query SQL para agrupar por mes_ano e contar registros
+        resultado = supabase.rpc(
+            "get_competencias_count",
+            {}
+        ).execute()
+        
+        # Fallback: se a função RPC não existir, faz manualmente
+        if not resultado.data:
+            all_data = supabase.table("gratificacoes").select("mes_ano").execute()
+            from collections import Counter
+            counts = Counter([r["mes_ano"] for r in all_data.data if r.get("mes_ano")])
+            competencias = [{"mes_ano": k, "total": v} for k, v in sorted(counts.items(), reverse=True)]
+            return JSONResponse({"ok": True, "competencias": competencias})
+        
+        return JSONResponse({"ok": True, "competencias": resultado.data})
+    except Exception as e:
+        # Fallback manual
+        try:
+            supabase = get_supabase()
+            all_data = supabase.table("gratificacoes").select("mes_ano").execute()
+            from collections import Counter
+            counts = Counter([r["mes_ano"] for r in all_data.data if r.get("mes_ano")])
+            competencias = [{"mes_ano": k, "total": v} for k, v in sorted(counts.items(), reverse=True)]
+            return JSONResponse({"ok": True, "competencias": competencias})
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=str(e2))
+
+
+@app.post("/api/delete-competencia")
+async def deletar_competencia(request: Request):
+    """Deleta todos os registros de uma competência específica."""
+    try:
+        body = await request.json()
+        mes_ano = body.get("mes_ano")
+        
+        if not mes_ano:
+            raise HTTPException(status_code=400, detail="mes_ano não fornecido")
+        
+        supabase = get_supabase()
+        resultado = (
+            supabase.table("gratificacoes")
+            .delete()
+            .eq("mes_ano", mes_ano)
+            .execute()
+        )
+        return JSONResponse({"ok": True, "deleted": len(resultado.data) if resultado.data else 0})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
