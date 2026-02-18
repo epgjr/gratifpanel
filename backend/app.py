@@ -292,14 +292,34 @@ async def listar_competencias():
     try:
         supabase = get_supabase()
         
-        # Busca TODOS os registros (só a coluna mes_ano)
-        # IMPORTANTE: range com valor alto para pegar tudo
-        resultado = supabase.table("gratificacoes").select("mes_ano", count="exact").range(0, 999999).execute()
+        # Busca em páginas de 1000 até pegar tudo
+        all_data = []
+        page_size = 1000
+        offset = 0
+        
+        while True:
+            resultado = (
+                supabase.table("gratificacoes")
+                .select("mes_ano")
+                .range(offset, offset + page_size - 1)
+                .execute()
+            )
+            
+            if not resultado.data:
+                break
+                
+            all_data.extend(resultado.data)
+            
+            # Se retornou menos que page_size, chegamos ao fim
+            if len(resultado.data) < page_size:
+                break
+                
+            offset += page_size
         
         # Conta manualmente usando Python
         from collections import Counter
-        if resultado.data:
-            counts = Counter([r["mes_ano"] for r in resultado.data if r.get("mes_ano")])
+        if all_data:
+            counts = Counter([r["mes_ano"] for r in all_data if r.get("mes_ano")])
             competencias = [
                 {"mes_ano": mes, "total": total} 
                 for mes, total in sorted(counts.items(), reverse=True)
