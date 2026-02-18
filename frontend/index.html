@@ -3,619 +3,910 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GratifPanel — Importar Competência</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>GRD</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d1117; --surface: #161b22; --surface2: #1c2333;
-    --border: #30363d; --accent: #1f6feb; --accent-glow: rgba(31,111,235,0.15);
-    --accent2: #3fb950; --accent2-glow: rgba(63,185,80,0.12);
-    --warn: #d29922; --warn-glow: rgba(210,153,34,0.12);
-    --danger: #f85149; --danger-glow: rgba(248,81,73,0.12);
-    --text: #e6edf3; --text2: #8b949e; --text3: #484f58;
-    --radius: 10px; --radius-lg: 16px;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    background: #fafafa;
+    color: #1d1d1f;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* TOPBAR */
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
-  .brand-name { font-size: 14px; font-weight: 700; }
-  .brand-sub { font-size: 10px; color: var(--text2); font-family: 'DM Mono', monospace; letter-spacing:.06em; text-transform:uppercase; }
-  .user-badge { display:flex; align-items:center; gap:8px; }
-  .avatar { width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1f6feb,#3fb950);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700; }
+  /* LOGIN */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
 
-  /* LAYOUT */
-  .layout { display:flex; flex:1; min-height: calc(100vh - 56px); }
+  .login-box {
+    background: white;
+    border-radius: 12px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
 
-  /* SIDEBAR */
-  .sidebar { width:220px; background:var(--surface); border-right:1px solid var(--border); padding:24px 0; flex-shrink:0; }
-  .nav-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:.12em; text-transform:uppercase; padding:16px 20px 8px; }
-  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 20px; font-size:13px; color:var(--text2); cursor:pointer; border-left:2px solid transparent; transition:all .15s; }
-  .nav-item:hover { color:var(--text); background:var(--surface2); }
-  .nav-item.active { color:var(--accent); background:var(--accent-glow); border-left-color:var(--accent); font-weight:500; }
+  .login-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #667eea;
+  }
 
-  /* MAIN */
-  .main { flex:1; padding:32px; overflow-y:auto; display:flex; flex-direction:column; gap:24px; }
-  .page-title { font-size:22px; font-weight:700; }
-  .page-sub { font-size:13px; color:var(--text2); margin-top:4px; }
+  .login-subtitle {
+    font-size: 12px;
+    text-align: center;
+    color: #86868b;
+    margin-bottom: 32px;
+  }
 
-  /* CARDS */
-  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; position:relative; overflow:hidden; }
-  .card::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; }
-  .card.blue::before { background:linear-gradient(90deg,var(--accent),transparent); }
-  .card.green::before { background:linear-gradient(90deg,var(--accent2),transparent); }
-  .card.yellow::before { background:linear-gradient(90deg,var(--warn),transparent); }
-  .card-label { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; }
-  .card-value { font-size:24px; font-weight:700; margin-top:8px; }
-  .card-value.blue{color:var(--accent)} .card-value.green{color:var(--accent2)} .card-value.yellow{color:var(--warn)}
-  .card-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+  .login-field {
+    margin-bottom: 16px;
+  }
 
-  /* PANEL */
-  .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
-  .panel-header { padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; justify-content:space-between; }
-  .panel-title { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
-  .panel-body { padding:24px; display:flex; flex-direction:column; gap:20px; }
+  .login-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #6e6e73;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-  /* BADGE */
-  .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; font-family:'DM Mono',monospace; }
-  .badge-blue { background:var(--accent-glow); color:var(--accent); border:1px solid rgba(31,111,235,.3); }
-  .badge-green { background:var(--accent2-glow); color:var(--accent2); border:1px solid rgba(63,185,80,.3); }
-  .badge-yellow { background:var(--warn-glow); color:var(--warn); border:1px solid rgba(210,153,34,.3); }
-  .badge-red { background:var(--danger-glow); color:var(--danger); border:1px solid rgba(248,81,73,.3); }
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
 
-  /* FORM */
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .form-group { display:flex; flex-direction:column; gap:6px; }
-  .form-group.full { grid-column:1/-1; }
-  .label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; font-family:'DM Mono',monospace; }
-  .input, select.input { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; color:var(--text); font-family:'Sora',sans-serif; font-size:13px; outline:none; transition:border-color .2s; width:100%; }
-  .input:focus, select.input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+  .login-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: 300;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: all 0.2s;
+  }
+
+  .login-btn:hover {
+    background: #5568d3;
+  }
+
+  .login-btn:disabled {
+    background: #d2d2d7;
+    cursor: not-allowed;
+  }
+
+  /* HEADER */
+  .header {
+    background: white;
+    border-bottom: 1px solid #d2d2d7;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+
+  .user-info {
+    font-size: 11px;
+    color: #86868b;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logout-btn {
+    font-size: 11px;
+    color: #667eea;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* NAV */
+  .nav {
+    background: white;
+    border-bottom: 1px solid #d2d2d7;
+    padding: 0 24px;
+    display: flex;
+    gap: 32px;
+  }
+
+  .nav-item {
+    padding: 14px 0;
+    font-size: 12px;
+    color: #6e6e73;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .nav-item:hover {
+    color: #1d1d1f;
+  }
+
+  .nav-item.active {
+    color: #1d1d1f;
+    border-bottom-color: #1d1d1f;
+    font-weight: 500;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 1000px;
+    margin: 32px auto;
+    padding: 0 24px;
+  }
+
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+    border: 1px solid #d2d2d7;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* FIELD */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #6e6e73;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d2d2d7;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
 
   /* TOGGLE */
-  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--danger-glow); border:1px solid rgba(248,81,73,.2); border-radius:var(--radius); }
-  .toggle-info .toggle-title { font-size:13px; font-weight:600; color:var(--danger); }
-  .toggle-info .toggle-desc { font-size:11px; color:var(--text2); margin-top:2px; }
-  .toggle { width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0; }
-  .toggle.on { background:var(--danger); }
-  .toggle::after { content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s; }
-  .toggle.on::after { transform:translateX(20px); }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f5f5f7;
+    border-radius: 8px;
+  }
+
+  .toggle-text {
+    font-size: 12px;
+    color: #1d1d1f;
+  }
+
+  .toggle {
+    width: 44px;
+    height: 26px;
+    background: #d2d2d7;
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle.on {
+    background: #34c759;
+  }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .toggle.on::after {
+    transform: translateX(18px);
+  }
 
   /* DROPZONE */
-  .dropzone { border:2px dashed var(--border); border-radius:var(--radius-lg); padding:40px 24px; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); }
-  .dropzone:hover,.dropzone.drag { border-color:var(--accent); background:var(--accent-glow); }
-  .dropzone.loaded { border-color:var(--accent2); background:var(--accent2-glow); border-style:solid; }
-  .dropzone.error { border-color:var(--danger); background:var(--danger-glow); border-style:solid; }
-  .drop-icon { font-size:36px; margin-bottom:10px; }
-  .drop-title { font-size:14px; font-weight:600; margin-bottom:4px; }
-  .drop-sub { font-size:12px; color:var(--text2); }
-  .drop-tag { display:inline-block; margin-top:10px; padding:3px 12px; background:var(--surface2); border-radius:20px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text2); border:1px solid var(--border); }
-  input[type=file] { display:none; }
+  .dropzone {
+    border: 1px dashed #d2d2d7;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafafa;
+  }
 
-  /* VALIDAÇÃO */
-  .valid-box { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-  .valid-header { padding:10px 16px; background:var(--surface2); border-bottom:1px solid var(--border); font-size:12px; font-weight:600; }
-  .check-row { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); font-size:12px; }
-  .check-row:last-child { border-bottom:none; }
-  .check-name { color:var(--text2); display:flex; align-items:center; gap:8px; }
-  .ok{color:var(--accent2)} .warn-t{color:var(--warn)} .err{color:var(--danger)}
+  .dropzone:hover {
+    border-color: #667eea;
+    background: #f5f7ff;
+  }
 
-  /* PREVIEW */
-  .preview-wrap { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-  .preview-bar { padding:10px 16px; background:var(--surface2); border-bottom:1px solid var(--border); font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:space-between; }
-  .tbl { width:100%; border-collapse:collapse; }
-  .tbl th { background:var(--surface2); padding:8px 12px; text-align:left; font-size:10px; font-family:'DM Mono',monospace; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); white-space:nowrap; }
-  .tbl td { padding:8px 12px; font-size:12px; border-bottom:1px solid var(--border); }
-  .tbl tr:last-child td { border-bottom:none; }
-  .tbl tr:hover td { background:var(--surface2); }
-  .mono { font-family:'DM Mono',monospace; }
-  .val-green { color:var(--accent2); }
+  .dropzone.loaded {
+    border-color: #34c759;
+    border-style: solid;
+    background: #f0fdf4;
+  }
+
+  .drop-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .drop-text {
+    font-size: 12px;
+    color: #6e6e73;
+  }
+
+  .drop-file {
+    font-size: 13px;
+    font-weight: 500;
+    color: #34c759;
+    margin-bottom: 4px;
+  }
+
+  .drop-info {
+    font-size: 11px;
+    color: #86868b;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  /* VALIDATION */
+  .validation {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 12px;
+    color: #6e6e73;
+  }
+
+  /* PREVIEW TABLE */
+  .table-wrap {
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .table th {
+    background: #f5f5f7;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 500;
+    color: #6e6e73;
+    border-bottom: 1px solid #d2d2d7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f5f5f7;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table tr:hover td {
+    background: #fafafa;
+  }
 
   /* BUTTONS */
-  .btn-row { display:flex; gap:12px; justify-content:flex-end; }
-  .btn { padding:10px 20px; border-radius:var(--radius); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all .2s; display:flex; align-items:center; gap:8px; }
-  .btn-ghost { background:transparent; color:var(--text2); border:1px solid var(--border); }
-  .btn-ghost:hover { border-color:var(--text2); color:var(--text); }
-  .btn-primary { background:var(--accent); color:white; box-shadow:0 0 20px rgba(31,111,235,.3); }
-  .btn-primary:hover:not(:disabled) { background:#388bfd; transform:translateY(-1px); }
-  .btn-primary:disabled { background:var(--border); color:var(--text3); box-shadow:none; cursor:not-allowed; }
-  .btn-success { background:var(--accent2); color:#0d1117; }
-  .btn-success:hover { background:#56d364; }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
 
-  /* LOG */
-  .log-tbl { width:100%; border-collapse:collapse; }
-  .log-tbl th { background:var(--surface2); padding:10px 16px; text-align:left; font-size:10px; font-family:'DM Mono',monospace; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
-  .log-tbl td { padding:12px 16px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:middle; }
-  .log-tbl tr:last-child td { border-bottom:none; }
-  .log-tbl tr:hover td { background:var(--surface2); }
-  .pill { padding:3px 10px; border-radius:20px; font-size:10px; font-weight:600; font-family:'DM Mono',monospace; }
-  .pill-ok { background:var(--accent2-glow); color:var(--accent2); border:1px solid rgba(63,185,80,.3); }
-  .pill-sub { background:var(--warn-glow); color:var(--warn); border:1px solid rgba(210,153,34,.3); }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
 
-  /* PROGRESS */
-  .progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:8px; }
-  .progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .3s; width:0; }
+  .btn-secondary {
+    background: #f5f5f7;
+    color: #1d1d1f;
+  }
 
-  /* TOAST */
-  .toast { position:fixed; bottom:24px; right:24px; background:var(--surface); border-radius:var(--radius-lg); padding:16px 20px; display:none; align-items:center; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,.4); z-index:999; animation:slideUp .3s ease; }
-  .toast.show { display:flex; }
-  .toast.success { border:1px solid var(--accent2); }
-  .toast.error { border:1px solid var(--danger); }
-  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-  .toast-title { font-size:13px; font-weight:600; }
-  .toast-sub { font-size:11px; color:var(--text2); }
+  .btn-secondary:hover {
+    background: #e5e5ea;
+  }
+
+  .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5568d3;
+  }
+
+  .btn-primary:disabled {
+    background: #d2d2d7;
+    cursor: not-allowed;
+  }
+
+  .btn-danger {
+    background: #ff3b30;
+    color: white;
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .btn-danger:hover {
+    background: #ff2d20;
+  }
+
+  /* COMPETENCIAS LIST */
+  .comp-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .comp-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #fafafa;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .comp-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .comp-month {
+    font-weight: 500;
+  }
+
+  .comp-count {
+    color: #86868b;
+    font-size: 11px;
+  }
 
   /* SPINNER */
-  .spinner { width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite; }
-  @keyframes spin { to{transform:rotate(360deg)} }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d2d2d7;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin: 0 auto;
+  }
 
-  /* HIDDEN */
-  .hidden { display:none !important; }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    display: flex;
+  }
+
+  .toast.error {
+    border-color: #ff3b30;
+    background: #fff5f5;
+  }
+
+  .toast.success {
+    border-color: #34c759;
+    background: #f0fdf4;
+  }
+
+  .hidden {
+    display: none !important;
+  }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="brand-dot"></div>
-    <div>
-      <div class="brand-name">GratifPanel</div>
-      <div class="brand-sub">Gestão de Gratificação de Desempenho</div>
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1 class="login-title"></h1>
+    <p class="login-subtitle"></p>
+    
+    <div class="login-field">
+      <input type="email" class="login-input" id="loginEmail" placeholder="">
     </div>
-  </div>
-  <div class="user-badge">
-    <div id="userName" style="font-size:12px;font-weight:600;text-align:right"></div>
-    <div class="avatar" id="userAvatar">?</div>
+    
+    <div class="login-field">
+      <input type="password" class="login-input" id="loginPassword" placeholder="">
+    </div>
+    
+    <button class="login-btn" onclick="login()">→</button>
   </div>
 </div>
 
-<div class="layout">
-  <div class="sidebar">
-    <div class="nav-label">Principal</div>
-    <div class="nav-item">📊 Dashboard</div>
-    <div class="nav-item active">⬆️ Importar Dados</div>
-    <div class="nav-item">📅 Competências</div>
-    <div class="nav-label">Análise</div>
-    <div class="nav-item">📈 Evolução Mensal</div>
-    <div class="nav-item">👥 Por Servidor</div>
-    <div class="nav-item">🏢 Por Cargo</div>
-    <div class="nav-label">Config</div>
-    <div class="nav-item">⚙️ Configurações</div>
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+  
+  <div class="header">
+    <div class="logo">GRD</div>
+    <div class="user-info">
+      <span id="userEmail"></span>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
   </div>
 
-  <div class="main">
+  <div class="nav">
+    <div class="nav-item active" onclick="showTab('import')">Importar</div>
+    <div class="nav-item" onclick="showTab('competencias')">Competências</div>
+    <div class="nav-item" onclick="showTab('historico')">Histórico</div>
+  </div>
 
-    <div>
-      <div class="page-title">Importar Competência</div>
-      <div class="page-sub">Carregue o arquivo CSV mensal da gratificação de desempenho</div>
-    </div>
+  <div class="container">
 
-    <!-- CARDS RESUMO -->
-    <div class="cards" id="cardsResumo">
-      <div class="card blue">
-        <div class="card-label">Última competência</div>
-        <div class="card-value blue" id="ultimaComp">—</div>
-        <div class="card-sub" id="ultimaData">Aguardando dados...</div>
-      </div>
-      <div class="card green">
-        <div class="card-label">Registros na última</div>
-        <div class="card-value green" id="ultimaLinhas">—</div>
-        <div class="card-sub" id="ultimaOp">—</div>
-      </div>
-      <div class="card yellow">
-        <div class="card-label">Total de importações</div>
-        <div class="card-value yellow" id="totalImport">—</div>
-        <div class="card-sub">no histórico</div>
-      </div>
-    </div>
-
-    <!-- PAINEL DE UPLOAD -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">⬆️ Importação de arquivo CSV</div>
-        <span class="badge badge-blue" id="etapaBadge">Etapa 1 de 3 — Configurar</span>
-      </div>
-      <div class="panel-body">
-
-        <!-- ETAPA 1: CONFIGURAÇÃO -->
-        <div id="etapa1">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="label">Seu nome ou e-mail</label>
-              <input class="input" id="inputUsuario" type="text" placeholder="ex: joao.silva@orgao.gov.br">
+    <!-- TAB: IMPORTAR -->
+    <div id="tabImport">
+      <div class="section">
+        <h2 class="section-title">Importar</h2>
+        
+        <div class="field">
+          <label class="label">Arquivo CSV</label>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <div id="dropDefault">
+              <div class="drop-icon">📁</div>
+              <div class="drop-text">Arraste ou clique para selecionar</div>
             </div>
-            <div class="form-group">
-              <label class="label">Arquivo CSV</label>
-              <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
-                ondragover="event.preventDefault();this.classList.add('drag')"
-                ondragleave="this.classList.remove('drag')"
-                ondrop="handleDrop(event)">
-                <div id="dropDefault">
-                  <div class="drop-icon">📂</div>
-                  <div class="drop-title">Clique ou arraste o CSV aqui</div>
-                  <div class="drop-sub">Arquivo exportado do sistema de folha</div>
-                  <div class="drop-tag">Apenas .CSV separado por ponto e vírgula</div>
-                </div>
-                <div id="dropLoaded" class="hidden">
-                  <div class="drop-icon">✅</div>
-                  <div class="drop-title" id="nomeArquivo" style="color:var(--accent2)"></div>
-                  <div class="drop-sub" id="infoArquivo"></div>
-                  <div class="drop-tag" style="color:var(--accent2);border-color:var(--accent2)">Arquivo selecionado</div>
-                </div>
-              </div>
-              <input type="file" id="fileInput" accept=".csv" onchange="selecionarArquivo(this)">
-            </div>
-            <div class="form-group full">
-              <div class="toggle-row">
-                <div class="toggle-info">
-                  <div class="toggle-title">⚠️ Substituir competência existente</div>
-                  <div class="toggle-desc">Ative se este mês já foi importado e precisa ser reprocessado</div>
-                </div>
-                <div class="toggle" id="toggleSubstituir" onclick="toggleModo()"></div>
-              </div>
+            <div id="dropLoaded" class="hidden">
+              <div class="drop-icon">✅</div>
+              <div class="drop-file" id="fileName"></div>
+              <div class="drop-info" id="fileInfo"></div>
             </div>
           </div>
+          <input type="file" id="fileInput" accept=".csv" onchange="selectFile(this)">
+        </div>
 
-          <div class="btn-row">
-            <button class="btn btn-primary" id="btnValidar" onclick="validarCSV()" disabled>
-              🔍 Validar arquivo
-            </button>
+        <div class="field">
+          <div class="toggle-row">
+            <span class="toggle-text">Substituir competência existente</span>
+            <div class="toggle" id="toggleReplace" onclick="this.classList.toggle('on')"></div>
           </div>
         </div>
 
-        <!-- ETAPA 2: RESULTADO DA VALIDAÇÃO -->
-        <div id="etapa2" class="hidden">
-          <div class="valid-box">
-            <div class="valid-header">🔍 Resultado da validação automática</div>
-            <div class="check-row">
-              <div class="check-name">📋 Estrutura do arquivo (colunas obrigatórias)</div>
-              <div class="ok" id="checkColunas">Verificando...</div>
-            </div>
-            <div class="check-row">
-              <div class="check-name">🔢 Total de linhas detectadas</div>
-              <div class="ok" id="checkLinhas">—</div>
-            </div>
-            <div class="check-row">
-              <div class="check-name">📅 MES_ANO identificado</div>
-              <div id="checkMesAno" class="ok">—</div>
-            </div>
-            <div class="check-row">
-              <div class="check-name">💰 Valores inválidos (não numéricos)</div>
-              <div id="checkValores" class="ok">—</div>
-            </div>
-            <div class="check-row">
-              <div class="check-name">🔁 Competência já importada no banco</div>
-              <div id="checkExiste" class="ok">—</div>
-            </div>
+        <div id="validationResult" class="hidden">
+          <div class="validation">
+            <div class="check"><span id="check1">⏳</span> <span id="checkText1">Estrutura</span></div>
+            <div class="check"><span id="check2">⏳</span> <span id="checkText2">Linhas</span></div>
+            <div class="check"><span id="check3">⏳</span> <span id="checkText3">Competência</span></div>
+            <div class="check"><span id="check4">⏳</span> <span id="checkText4">Valores</span></div>
           </div>
-
-          <!-- PREVIEW -->
-          <div class="preview-wrap" id="previewWrap">
-            <div class="preview-bar">
-              <span>👁️ Pré-visualização — primeiras 5 linhas</span>
-              <span class="badge badge-green" id="previewBadge"></span>
-            </div>
-            <div style="overflow-x:auto">
-              <table class="tbl" id="previewTabela">
-                <thead id="previewHead"></thead>
-                <tbody id="previewBody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="voltarEtapa1()">↩ Voltar</button>
-            <button class="btn btn-primary" id="btnConfirmar" onclick="confirmarImportacao()">
-              ✓ Confirmar e importar
-            </button>
+          
+          <div id="previewTable" class="table-wrap hidden">
+            <table class="table">
+              <thead id="previewHead"></thead>
+              <tbody id="previewBody"></tbody>
+            </table>
           </div>
         </div>
 
-        <!-- ETAPA 3: PROGRESSO -->
-        <div id="etapa3" class="hidden">
-          <div style="text-align:center;padding:32px 0">
-            <div style="font-size:36px;margin-bottom:12px">⏳</div>
-            <div style="font-size:15px;font-weight:600;margin-bottom:8px">Importando dados...</div>
-            <div style="font-size:12px;color:var(--text2);margin-bottom:20px" id="progressoTexto">Aguarde, isso pode levar alguns instantes.</div>
-            <div class="progress-bar" style="max-width:400px;margin:0 auto">
-              <div class="progress-fill" id="progressoFill"></div>
-            </div>
-          </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="reset()">Limpar</button>
+          <button class="btn btn-primary" id="btnValidate" onclick="validateFile()" disabled>Validar</button>
+          <button class="btn btn-primary hidden" id="btnConfirm" onclick="confirmImport()">Confirmar</button>
         </div>
+      </div>
 
-        <!-- ETAPA 4: CONCLUÍDO -->
-        <div id="etapa4" class="hidden">
-          <div style="text-align:center;padding:32px 0">
-            <div style="font-size:48px;margin-bottom:12px">✅</div>
-            <div style="font-size:18px;font-weight:700;color:var(--accent2);margin-bottom:8px">Importação concluída!</div>
-            <div style="font-size:13px;color:var(--text2);margin-bottom:24px" id="resumoConcluido"></div>
-            <button class="btn btn-ghost" onclick="novaImportacao()" style="margin:0 auto">
-              + Nova importação
-            </button>
-          </div>
+      <div class="section" id="sectionHistory">
+        <h2 class="section-title">Histórico</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Competência</th>
+                <th>Usuário</th>
+                <th>Data</th>
+                <th>Linhas</th>
+                <th>Operação</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
         </div>
-
       </div>
     </div>
 
-    <!-- LOG -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">📋 Histórico de importações</div>
-        <span class="badge badge-green" id="logBadge">Carregando...</span>
+    <!-- TAB: COMPETÊNCIAS -->
+    <div id="tabCompetencias" class="hidden">
+      <div class="section">
+        <h2 class="section-title">Competências no banco</h2>
+        <div id="compList" class="comp-list"></div>
       </div>
-      <div style="overflow-x:auto">
-        <table class="log-tbl">
-          <thead>
-            <tr>
-              <th>Competência</th>
-              <th>Usuário</th>
-              <th>Data / Hora</th>
-              <th>Linhas</th>
-              <th>Operação</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="logBody">
-            <tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">Carregando histórico...</td></tr>
-          </tbody>
-        </table>
+    </div>
+
+    <!-- TAB: HISTÓRICO -->
+    <div id="tabHistorico" class="hidden">
+      <div class="section">
+        <h2 class="section-title">Todas as importações</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Competência</th>
+                <th>Usuário</th>
+                <th>Data</th>
+                <th>Linhas</th>
+                <th>Operação</th>
+              </tr>
+            </thead>
+            <tbody id="fullHistoryBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast">
-  <div style="font-size:20px" id="toastIcon">✅</div>
-  <div>
-    <div class="toast-title" id="toastTitle"></div>
-    <div class="toast-sub" id="toastSub"></div>
-  </div>
+  <span id="toastIcon"></span>
+  <span id="toastText"></span>
 </div>
 
 <script>
-  // ── Estado
-  let arquivoSelecionado = null;
-  let substituirModo = false;
-  let dadosValidacao = null;
   const API = window.location.origin;
+  let currentUser = null;
+  let selectedFile = null;
+  let validationData = null;
 
-  // ── Init
-  window.onload = () => {
-    carregarHistorico();
-    document.getElementById('inputUsuario').addEventListener('input', verificarPronto);
-  };
-
-  // ── Toggle substituição
-  function toggleModo() {
-    substituirModo = !substituirModo;
-    document.getElementById('toggleSubstituir').classList.toggle('on', substituirModo);
-  }
-
-  // ── Seleção de arquivo
-  function selecionarArquivo(input) {
-    if (input.files[0]) processarArquivo(input.files[0]);
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('dropzone').classList.remove('drag');
-    if (e.dataTransfer.files[0]) processarArquivo(e.dataTransfer.files[0]);
-  }
-
-  function processarArquivo(file) {
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      mostrarToast('error', '❌ Arquivo inválido', 'Selecione um arquivo .CSV');
+  // AUTH
+  async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+      showToast('error', '❌ Preencha e-mail e senha');
       return;
     }
-    arquivoSelecionado = file;
-    const tamanho = (file.size / 1024 / 1024).toFixed(1);
-    document.getElementById('dropDefault').classList.add('hidden');
-    document.getElementById('dropLoaded').classList.remove('hidden');
-    document.getElementById('nomeArquivo').textContent = file.name;
-    document.getElementById('infoArquivo').textContent = `${tamanho} MB`;
-    document.getElementById('dropzone').classList.add('loaded');
-    verificarPronto();
-  }
 
-  function verificarPronto() {
-    const usuario = document.getElementById('inputUsuario').value.trim();
-    document.getElementById('btnValidar').disabled = !(arquivoSelecionado && usuario);
-  }
-
-  // ── ETAPA 1: Validação
-  async function validarCSV() {
-    const usuario = document.getElementById('inputUsuario').value.trim();
-    if (!arquivoSelecionado || !usuario) return;
-
-    document.getElementById('btnValidar').innerHTML = '<div class="spinner"></div> Validando...';
-    document.getElementById('btnValidar').disabled = true;
-
-    const form = new FormData();
-    form.append('arquivo', arquivoSelecionado);
+    const btn = document.querySelector('.login-btn');
+    btn.disabled = true;
+    btn.textContent = 'Validando...';
 
     try {
-      const resp = await fetch(`${API}/api/validar`, { method: 'POST', body: form });
-      dadosValidacao = await resp.json();
-      mostrarValidacao(dadosValidacao);
-    } catch(e) {
-      mostrarToast('error', '❌ Erro de conexão', 'Verifique se o servidor está online');
-      document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
-      document.getElementById('btnValidar').disabled = false;
+      const form = new FormData();
+      form.append('email', email);
+      form.append('password', password);
+
+      const resp = await fetch(`${API}/api/login`, {
+        method: 'POST',
+        body: form
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        currentUser = data.email;
+        sessionStorage.setItem('user', data.email);
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('userEmail').textContent = data.email;
+        loadHistory();
+      } else {
+        const error = await resp.json();
+        showToast('error', '❌ ' + (error.detail || 'Acesso negado'));
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    } catch (e) {
+      showToast('error', '❌ Erro de conexão');
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
     }
   }
 
-  function mostrarValidacao(d) {
-    document.getElementById('etapa1').classList.add('hidden');
-    document.getElementById('etapa2').classList.remove('hidden');
-    document.getElementById('etapaBadge').textContent = 'Etapa 2 de 3 — Validar';
+  function logout() {
+    sessionStorage.removeItem('user');
+    location.reload();
+  }
 
-    // Checks
-    document.getElementById('checkColunas').className = d.ok ? 'ok' : 'err';
-    document.getElementById('checkColunas').textContent = d.ok
-      ? '✓ Aprovado — todas as colunas encontradas'
-      : `✗ Erro — colunas faltando: ${d.colunas_faltando.join(', ')}`;
-
-    document.getElementById('checkLinhas').textContent = `✓ ${d.total_linhas.toLocaleString('pt-BR')} linhas detectadas`;
-
-    document.getElementById('checkMesAno').textContent = d.mes_ano
-      ? `✓ ${d.mes_ano}`
-      : '⚠ Não identificado';
-    document.getElementById('checkMesAno').className = d.mes_ano ? 'ok' : 'warn-t';
-
-    document.getElementById('checkValores').textContent = d.valores_invalidos === 0
-      ? '✓ Nenhum valor inválido'
-      : `⚠ ${d.valores_invalidos} valores não numéricos`;
-    document.getElementById('checkValores').className = d.valores_invalidos === 0 ? 'ok' : 'warn-t';
-
-    document.getElementById('checkExiste').textContent = d.ja_existe
-      ? `⚠ Atenção — ${d.mes_ano} já foi importado. Ative "Substituir" para reprocessar.`
-      : '✓ Não — primeira importação deste mês';
-    document.getElementById('checkExiste').className = d.ja_existe ? 'warn-t' : 'ok';
-
-    // Preview
-    if (d.preview && d.preview.length > 0) {
-      const cols = Object.keys(d.preview[0]);
-      document.getElementById('previewBadge').textContent = `${d.total_linhas.toLocaleString('pt-BR')} linhas no total`;
-      document.getElementById('previewHead').innerHTML =
-        '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
-      document.getElementById('previewBody').innerHTML =
-        d.preview.map(row =>
-          '<tr>' + cols.map(c => `<td class="${c==='VALOR'?'mono val-green':'mono'}">${row[c]??''}</td>`).join('') + '</tr>'
-        ).join('');
+  window.onload = () => {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      currentUser = user;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('userEmail').textContent = user;
+      loadHistory();
     }
+  };
 
-    document.getElementById('btnConfirmar').disabled = !d.ok;
+  // TABS
+  function showTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('tabImport').classList.toggle('hidden', tab !== 'import');
+    document.getElementById('tabCompetencias').classList.toggle('hidden', tab !== 'competencias');
+    document.getElementById('tabHistorico').classList.toggle('hidden', tab !== 'historico');
+    
+    if (tab === 'competencias') loadCompetencias();
+    if (tab === 'historico') loadFullHistory();
   }
 
-  function voltarEtapa1() {
-    document.getElementById('etapa2').classList.add('hidden');
-    document.getElementById('etapa1').classList.remove('hidden');
-    document.getElementById('etapaBadge').textContent = 'Etapa 1 de 3 — Configurar';
-    document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
-    document.getElementById('btnValidar').disabled = false;
+  // FILE
+  function selectFile(input) {
+    if (input.files[0]) processFile(input.files[0]);
   }
 
-  // ── ETAPA 2: Confirmação e importação
-  async function confirmarImportacao() {
-    const usuario = document.getElementById('inputUsuario').value.trim();
+  function processFile(file) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      showToast('error', '❌ Apenas .CSV');
+      return;
+    }
+    selectedFile = file;
+    document.getElementById('dropDefault').classList.add('hidden');
+    document.getElementById('dropLoaded').classList.remove('hidden');
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileInfo').textContent = `${(file.size/1024/1024).toFixed(1)} MB`;
+    document.getElementById('dropzone').classList.add('loaded');
+    document.getElementById('btnValidate').disabled = false;
+  }
 
-    document.getElementById('etapa2').classList.add('hidden');
-    document.getElementById('etapa3').classList.remove('hidden');
-    document.getElementById('etapaBadge').textContent = 'Etapa 3 de 3 — Importando';
-
-    // Animação de progresso
-    let prog = 0;
-    const interval = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 8, 90);
-      document.getElementById('progressoFill').style.width = prog + '%';
-    }, 400);
-
+  async function validateFile() {
+    document.getElementById('btnValidate').disabled = true;
+    document.getElementById('btnValidate').textContent = 'Validando...';
+    
     const form = new FormData();
-    form.append('arquivo', arquivoSelecionado);
-    form.append('usuario', usuario);
-    form.append('substituir', substituirModo);
+    form.append('arquivo', selectedFile);
+    
+    try {
+      const resp = await fetch(`${API}/api/validar`, { method: 'POST', body: form });
+      validationData = await resp.json();
+      showValidation(validationData);
+    } catch (e) {
+      showToast('error', '❌ Erro ao validar');
+      document.getElementById('btnValidate').disabled = false;
+      document.getElementById('btnValidate').textContent = 'Validar';
+    }
+  }
 
+  function showValidation(data) {
+    document.getElementById('validationResult').classList.remove('hidden');
+    
+    document.getElementById('check1').textContent = data.ok ? '✅' : '❌';
+    document.getElementById('checkText1').textContent = data.ok ? 'Estrutura OK' : 'Estrutura inválida';
+    
+    document.getElementById('check2').textContent = '✅';
+    document.getElementById('checkText2').textContent = `${data.total_linhas.toLocaleString('pt-BR')} linhas`;
+    
+    document.getElementById('check3').textContent = data.mes_ano ? '✅' : '⚠️';
+    document.getElementById('checkText3').textContent = data.mes_ano || 'Não identificado';
+    
+    document.getElementById('check4').textContent = data.valores_invalidos === 0 ? '✅' : '⚠️';
+    document.getElementById('checkText4').textContent = data.valores_invalidos === 0 ? 'Valores OK' : `${data.valores_invalidos} inválidos`;
+    
+    if (data.preview && data.preview.length > 0) {
+      const cols = Object.keys(data.preview[0]).slice(0, 6);
+      document.getElementById('previewHead').innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+      document.getElementById('previewBody').innerHTML = data.preview.slice(0, 5).map(row =>
+        '<tr>' + cols.map(c => `<td>${row[c]||''}</td>`).join('') + '</tr>'
+      ).join('');
+      document.getElementById('previewTable').classList.remove('hidden');
+    }
+    
+    document.getElementById('btnValidate').classList.add('hidden');
+    document.getElementById('btnConfirm').classList.remove('hidden');
+    document.getElementById('btnConfirm').disabled = !data.ok;
+  }
+
+  async function confirmImport() {
+    document.getElementById('btnConfirm').disabled = true;
+    document.getElementById('btnConfirm').innerHTML = '<div class="spinner"></div>';
+    
+    const form = new FormData();
+    form.append('arquivo', selectedFile);
+    form.append('usuario', currentUser);
+    form.append('substituir', document.getElementById('toggleReplace').classList.contains('on'));
+    
     try {
       const resp = await fetch(`${API}/api/importar`, { method: 'POST', body: form });
       const data = await resp.json();
-      clearInterval(interval);
-      document.getElementById('progressoFill').style.width = '100%';
-
-      setTimeout(() => {
-        document.getElementById('etapa3').classList.add('hidden');
-        document.getElementById('etapa4').classList.remove('hidden');
-        document.getElementById('etapaBadge').textContent = '✓ Concluído';
-        document.getElementById('resumoConcluido').textContent =
-          `${data.inseridos.toLocaleString('pt-BR')} registros inseridos · ${data.mes_ano} · operação: ${data.operacao}`;
-        mostrarToast('success', '🚀 Importação concluída!', `${data.inseridos.toLocaleString('pt-BR')} registros · ${data.mes_ano}`);
-        carregarHistorico();
-      }, 800);
-
-    } catch(e) {
-      clearInterval(interval);
-      mostrarToast('error', '❌ Erro na importação', 'Tente novamente ou contate o administrador');
-      document.getElementById('etapa3').classList.add('hidden');
-      document.getElementById('etapa2').classList.remove('hidden');
+      showToast('success', `✅ ${data.inseridos.toLocaleString('pt-BR')} registros importados`);
+      reset();
+      loadHistory();
+    } catch (e) {
+      showToast('error', '❌ Erro ao importar');
+      document.getElementById('btnConfirm').disabled = false;
+      document.getElementById('btnConfirm').textContent = 'Confirmar';
     }
   }
 
-  function novaImportacao() {
-    arquivoSelecionado = null;
-    dadosValidacao = null;
-    substituirModo = false;
-    document.getElementById('toggleSubstituir').classList.remove('on');
-    document.getElementById('dropzone').classList.remove('loaded','error');
+  function reset() {
+    selectedFile = null;
+    validationData = null;
+    document.getElementById('dropzone').classList.remove('loaded');
     document.getElementById('dropDefault').classList.remove('hidden');
     document.getElementById('dropLoaded').classList.add('hidden');
     document.getElementById('fileInput').value = '';
-    document.getElementById('etapa4').classList.add('hidden');
-    document.getElementById('etapa1').classList.remove('hidden');
-    document.getElementById('etapaBadge').textContent = 'Etapa 1 de 3 — Configurar';
-    document.getElementById('btnValidar').innerHTML = '🔍 Validar arquivo';
-    document.getElementById('btnValidar').disabled = true;
+    document.getElementById('validationResult').classList.add('hidden');
+    document.getElementById('btnValidate').classList.remove('hidden');
+    document.getElementById('btnConfirm').classList.add('hidden');
+    document.getElementById('btnValidate').disabled = true;
+    document.getElementById('btnValidate').textContent = 'Validar';
+    document.getElementById('toggleReplace').classList.remove('on');
   }
 
-  // ── Histórico
-  async function carregarHistorico() {
+  async function loadHistory() {
     try {
       const resp = await fetch(`${API}/api/historico`);
       const data = await resp.json();
       const logs = data.dados || [];
-
-      document.getElementById('logBadge').textContent = `${logs.length} operações`;
-
-      if (logs.length === 0) {
-        document.getElementById('logBody').innerHTML =
-          '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">Nenhuma importação registrada ainda</td></tr>';
-        return;
-      }
-
-      // Cards resumo
-      const ultimo = logs[0];
-      document.getElementById('ultimaComp').textContent = ultimo.mes_ano || '—';
-      document.getElementById('ultimaData').textContent = formatarData(ultimo.importado_em);
-      document.getElementById('ultimaLinhas').textContent = (ultimo.linhas_inseridas || 0).toLocaleString('pt-BR');
-      document.getElementById('ultimaOp').textContent = ultimo.operacao === 'SUBSTITUICAO' ? '↺ Reprocessamento' : '+ Nova importação';
-      document.getElementById('totalImport').textContent = logs.length;
-
-      document.getElementById('logBody').innerHTML = logs.map(l => `
+      
+      document.getElementById('historyBody').innerHTML = logs.slice(0, 5).map(l => `
         <tr>
-          <td><span class="badge badge-blue">${l.mes_ano || '—'}</span></td>
-          <td class="mono" style="font-size:11px">${l.importado_por || '—'}</td>
-          <td class="mono" style="font-size:11px;color:var(--text2)">${formatarData(l.importado_em)}</td>
-          <td class="mono" style="color:var(--text2)">${(l.linhas_inseridas||0).toLocaleString('pt-BR')}</td>
-          <td><span class="pill ${l.operacao==='SUBSTITUICAO'?'pill-sub':'pill-ok'}">${l.operacao==='SUBSTITUICAO'?'Substituição':'Nova'}</span></td>
-          <td style="color:var(--accent2)">✓ Sucesso</td>
+          <td>${l.mes_ano||'—'}</td>
+          <td style="font-size:10px">${l.importado_por||'—'}</td>
+          <td style="font-size:10px">${new Date(l.importado_em).toLocaleDateString('pt-BR')}</td>
+          <td>${(l.linhas_inseridas||0).toLocaleString('pt-BR')}</td>
+          <td style="font-size:10px">${l.operacao==='SUBSTITUICAO'?'Substituição':'Nova'}</td>
         </tr>
       `).join('');
-
-    } catch(e) {
-      document.getElementById('logBadge').textContent = 'erro ao carregar';
+    } catch (e) {
+      console.error('Erro ao carregar histórico', e);
     }
   }
 
-  // ── Toast
-  function mostrarToast(tipo, titulo, sub) {
-    const t = document.getElementById('toast');
-    t.className = `toast ${tipo} show`;
-    document.getElementById('toastTitle').textContent = titulo;
-    document.getElementById('toastSub').textContent = sub;
-    document.getElementById('toastIcon').textContent = tipo === 'success' ? '✅' : '❌';
-    setTimeout(() => t.classList.remove('show'), 5000);
+  async function loadCompetencias() {
+    document.getElementById('compList').innerHTML = '<div class="spinner"></div>';
+    
+    try {
+      const resp = await fetch(`${API}/api/competencias`);
+      const data = await resp.json();
+      
+      document.getElementById('compList').innerHTML = data.competencias.map(c => `
+        <div class="comp-item">
+          <div class="comp-info">
+            <span class="comp-month">${c.mes_ano}</span>
+            <span class="comp-count">${c.total.toLocaleString('pt-BR')} registros</span>
+          </div>
+          <button class="btn btn-danger" onclick="deleteCompetencia('${c.mes_ano}')">Excluir</button>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('compList').innerHTML = '<p style="text-align:center;color:#86868b;font-size:12px">Erro ao carregar</p>';
+    }
   }
 
-  // ── Helpers
-  function formatarData(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR') + ' · ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  async function deleteCompetencia(mesAno) {
+    if (!confirm(`Excluir todos os registros de ${mesAno}?`)) return;
+    
+    try {
+      await fetch(`${API}/api/delete-competencia`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mes_ano: mesAno })
+      });
+      showToast('success', '✅ Competência excluída');
+      loadCompetencias();
+    } catch (e) {
+      showToast('error', '❌ Erro ao excluir');
+    }
+  }
+
+  async function loadFullHistory() {
+    try {
+      const resp = await fetch(`${API}/api/historico`);
+      const data = await resp.json();
+      const logs = data.dados || [];
+      
+      document.getElementById('fullHistoryBody').innerHTML = logs.map(l => `
+        <tr>
+          <td>${l.mes_ano||'—'}</td>
+          <td style="font-size:10px">${l.importado_por||'—'}</td>
+          <td style="font-size:10px">${new Date(l.importado_em).toLocaleDateString('pt-BR')}</td>
+          <td>${(l.linhas_inseridas||0).toLocaleString('pt-BR')}</td>
+          <td style="font-size:10px">${l.operacao==='SUBSTITUICAO'?'Substituição':'Nova'}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      console.error('Erro ao carregar histórico completo', e);
+    }
+  }
+
+  function showToast(type, text) {
+    const toast = document.getElementById('toast');
+    toast.className = `toast ${type} show`;
+    document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '❌';
+    document.getElementById('toastText').textContent = text;
+    setTimeout(() => toast.classList.remove('show'), 3000);
   }
 </script>
 </body>
