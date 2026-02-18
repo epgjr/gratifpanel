@@ -291,32 +291,24 @@ async def listar_competencias():
     """Lista todas as competências (MES_ANO) no banco com contagem de registros."""
     try:
         supabase = get_supabase()
-        # Query SQL para agrupar por mes_ano e contar registros
-        resultado = supabase.rpc(
-            "get_competencias_count",
-            {}
-        ).execute()
         
-        # Fallback: se a função RPC não existir, faz manualmente
-        if not resultado.data:
-            all_data = supabase.table("gratificacoes").select("mes_ano").execute()
-            from collections import Counter
-            counts = Counter([r["mes_ano"] for r in all_data.data if r.get("mes_ano")])
-            competencias = [{"mes_ano": k, "total": v} for k, v in sorted(counts.items(), reverse=True)]
+        # Busca TODOS os registros (só a coluna mes_ano)
+        resultado = supabase.table("gratificacoes").select("mes_ano").execute()
+        
+        # Conta manualmente usando Python
+        from collections import Counter
+        if resultado.data:
+            counts = Counter([r["mes_ano"] for r in resultado.data if r.get("mes_ano")])
+            competencias = [
+                {"mes_ano": mes, "total": total} 
+                for mes, total in sorted(counts.items(), reverse=True)
+            ]
             return JSONResponse({"ok": True, "competencias": competencias})
-        
-        return JSONResponse({"ok": True, "competencias": resultado.data})
+        else:
+            return JSONResponse({"ok": True, "competencias": []})
+            
     except Exception as e:
-        # Fallback manual
-        try:
-            supabase = get_supabase()
-            all_data = supabase.table("gratificacoes").select("mes_ano").execute()
-            from collections import Counter
-            counts = Counter([r["mes_ano"] for r in all_data.data if r.get("mes_ano")])
-            competencias = [{"mes_ano": k, "total": v} for k, v in sorted(counts.items(), reverse=True)]
-            return JSONResponse({"ok": True, "competencias": competencias})
-        except Exception as e2:
-            raise HTTPException(status_code=500, detail=str(e2))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/delete-competencia")
