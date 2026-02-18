@@ -293,7 +293,8 @@ async def listar_competencias():
         supabase = get_supabase()
         
         # Busca TODOS os registros (só a coluna mes_ano)
-        resultado = supabase.table("gratificacoes").select("mes_ano").execute()
+        # IMPORTANTE: range com valor alto para pegar tudo
+        resultado = supabase.table("gratificacoes").select("mes_ano", count="exact").range(0, 999999).execute()
         
         # Conta manualmente usando Python
         from collections import Counter
